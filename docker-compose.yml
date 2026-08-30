@@ -1,0 +1,37 @@
+# TayMade — one command brings up the app + Postgres.
+#   docker compose up -d --build
+# Reads DB_PASSWORD / AUTH_SECRET / SITE_URL from a .env file in this folder
+# (copy .env.docker.example -> .env and fill it in).
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taymade
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: taymade
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taymade -d taymade"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://taymade:${DB_PASSWORD}@db:5432/taymade?schema=public"
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL:-}
+      NODE_ENV: production
+    ports:
+      - "80:3000"
+
+volumes:
+  pgdata:

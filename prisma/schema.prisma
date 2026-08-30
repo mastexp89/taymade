@@ -1,0 +1,400 @@
+// TayMade — data model (Phase 1 foundation, built to grow into Phases 2–3).
+// Postgres via Prisma. See planning/build-plan.html for the rationale.
+// Nothing pricing-related is hard-coded: prices, lead times, bundle contents
+// and homepage content all live in editable tables.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- enums ----------
+enum ProductSide {
+  PERSONAL
+  BUSINESS
+  BOTH
+}
+
+enum FieldType {
+  TEXT
+  TEXTAREA
+  SELECT
+  COLOUR
+  URL
+  NUMBER
+  UPLOAD
+}
+
+enum FulfilmentType {
+  COLLECTION
+  DELIVERY
+}
+
+/// Combined production pipeline for UV products AND outsourced-DTF clothing.
+enum ProductionStatus {
+  NEW
+  ARTWORK_REQUIRED
+  ARTWORK_READY
+  DTF_ORDERED
+  DTF_RECEIVED
+  READY_TO_PRINT
+  PRINTING
+  READY_TO_PRESS
+  PRESSED
+  QUALITY_CHECK
+  READY_FOR_COLLECTION
+  DISPATCHED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProofStatus {
+  NOT_REQUIRED
+  PENDING
+  SENT
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+enum UploadKind {
+  LOGO
+  PHOTO
+  ARTWORK
+  PRINT_FILE
+}
+
+enum TagType {
+  NFC
+  QR
+}
+
+enum EnquiryStatus {
+  NEW
+  IN_PROGRESS
+  QUOTED
+  WON
+  LOST
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+// ---------- catalogue & personalisation ----------
+model Category {
+  id        String      @id @default(cuid())
+  slug      String      @unique
+  name      String
+  side      ProductSide @default(PERSONAL)
+  parentId  String?
+  parent    Category?   @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[]  @relation("CategoryTree")
+  products  Product[]   @relation("ProductCategories")
+  position  Int         @default(0)
+  createdAt DateTime    @default(now())
+}
+
+model Product {
+  id            String                @id @default(cuid())
+  slug          String                @unique
+  title         String
+  shortDesc     String?
+  description    String?
+  basePrice     Decimal               @db.Decimal(10, 2)
+  leadTimeDays  Int                   @default(4)
+  side          ProductSide           @default(PERSONAL)
+  proofRequired Boolean               @default(false)
+  active        Boolean               @default(true)
+  bestSeller    Boolean               @default(false)
+  categories    Category[]            @relation("ProductCategories")
+  images        ProductImage[]
+  variants      ProductVariant[]
+  fields        PersonalisationField[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  position  Int     @default(0)
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku        String? @unique
+  /// e.g. { "size": "M", "colour": "Black" }
+  attributes Json
+  priceDelta Decimal @default(0) @db.Decimal(10, 2)
+  stockQty   Int     @default(0)
+  active     Boolean @default(true)
+}
+
+model PersonalisationField {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key       String
+  label     String
+  type      FieldType
+  required  Boolean   @default(false)
+  /// select/colour options, e.g. ["Script","Bold","Classic"]
+  options   Json?
+  helpText  String?
+  position  Int       @default(0)
+}
+
+model Bundle {
+  id        String       @id @default(cuid())
+  slug      String       @unique
+  name      String
+  price     Decimal      @db.Decimal(10, 2)
+  side      ProductSide  @default(BUSINESS)
+  active    Boolean      @default(true)
+  items     BundleItem[]
+  createdAt DateTime     @default(now())
+}
+
+model BundleItem {
+  id        String  @id @default(cuid())
+  bundleId  String
+  bundle    Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  label     String
+  qty       Int     @default(1)
+  productId String?
+}
+
+model Collection {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  activeFrom DateTime?
+  activeTo   DateTime?
+  /// product ids featured in this seasonal collection
+  productIds String[]
+  createdAt DateTime @default(now())
+}
+
+// ---------- customers, orders, production ----------
+model Customer {
+  id          String        @id @default(cuid())
+  email       String        @unique
+  name        String?
+  phone       String?
+  isBusiness  Boolean       @default(false)
+  companyName String?
+  brand       BrandProfile?
+  orders      Order[]
+  uploads     Upload[]
+  nfcTags     NfcTag[]
+  createdAt   DateTime      @default(now())
+}
+
+model BrandProfile {
+  id          String   @id @default(cuid())
+  customerId  String   @unique
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  logoUrl     String?
+  /// brand colours, e.g. ["#0E7C80","#F1502F"]
+  colours     Json?
+  companyName String?
+  details     Json?
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id            String           @id @default(cuid())
+  number        Int              @unique @default(autoincrement())
+  customerId    String?
+  customer      Customer?        @relation(fields: [customerId], references: [id])
+  guestName     String?
+  guestEmail    String?
+  /// "uv" (print) or "clothing" (outsourced DTF) — picks the production flow
+  pipeline      String           @default("uv")
+  status        ProductionStatus @default(NEW)
+  fulfilment    FulfilmentType   @default(COLLECTION)
+  proofStatus   ProofStatus      @default(NOT_REQUIRED)
+  subtotal      Decimal          @default(0) @db.Decimal(10, 2)
+  shipping      Decimal          @default(0) @db.Decimal(10, 2)
+  discountId    String?
+  discount      Discount?        @relation(fields: [discountId], references: [id])
+  total         Decimal          @default(0) @db.Decimal(10, 2)
+  notes         String?
+  items         OrderItem[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model OrderItem {
+  id         String                @id @default(cuid())
+  orderId    String
+  order      Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String?
+  product    Product?              @relation(fields: [productId], references: [id])
+  title      String
+  image      String?
+  variantSku String?
+  qty        Int                   @default(1)
+  unitPrice  Decimal               @db.Decimal(10, 2)
+  hasUpload  Boolean               @default(false)
+  itemStatus ProductionStatus      @default(NEW)
+  values     PersonalisationValue[]
+  proofs     Proof[]
+  nfcTags    NfcTag[]
+}
+
+model PersonalisationValue {
+  id          String    @id @default(cuid())
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  key         String
+  label       String
+  value       String?
+  uploadId    String?
+  upload      Upload?   @relation(fields: [uploadId], references: [id])
+}
+
+model Upload {
+  id         String                 @id @default(cuid())
+  customerId String?
+  customer   Customer?              @relation(fields: [customerId], references: [id])
+  url        String
+  mime       String?
+  kind       UploadKind             @default(ARTWORK)
+  values     PersonalisationValue[]
+  createdAt  DateTime               @default(now())
+}
+
+model Proof {
+  id          String      @id @default(cuid())
+  orderItemId String
+  orderItem   OrderItem   @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  url         String
+  status      ProofStatus @default(SENT)
+  note        String?
+  createdAt   DateTime    @default(now())
+}
+
+// ---------- NFC / QR (recurring-value system) ----------
+model NfcTag {
+  id             String    @id @default(cuid())
+  /// short public code used in /nfc/[code] or /q/[code]
+  code           String    @unique
+  type           TagType   @default(NFC)
+  label          String?
+  destinationUrl String?
+  orderItemId    String?
+  orderItem      OrderItem? @relation(fields: [orderItemId], references: [id])
+  customerId     String?
+  customer       Customer? @relation(fields: [customerId], references: [id])
+  scans          NfcScan[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model NfcScan {
+  id        String   @id @default(cuid())
+  tagId     String
+  tag       NfcTag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  referrer  String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+// ---------- commerce ----------
+model Discount {
+  id        String       @id @default(cuid())
+  code      String       @unique
+  type      DiscountType @default(PERCENT)
+  value     Decimal      @db.Decimal(10, 2)
+  minSpend  Decimal?     @db.Decimal(10, 2)
+  expiresAt DateTime?
+  active    Boolean      @default(true)
+  orders    Order[]
+  createdAt DateTime     @default(now())
+}
+
+model GiftCard {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  balance   Decimal  @db.Decimal(10, 2)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  author    String
+  rating    Int
+  body      String
+  photoUrl  String?
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Enquiry {
+  id         String        @id @default(cuid())
+  company    String?
+  contact    String
+  email      String
+  phone      String?
+  needs      String[]
+  quantity   String?
+  requiredBy String?
+  logoName   String?
+  message    String?
+  status     EnquiryStatus @default(NEW)
+  createdAt  DateTime      @default(now())
+}
+
+model StockItem {
+  id       String @id
+  name     String
+  variant  String
+  category String
+  qty      Int    @default(0)
+  low      Int    @default(0)
+  position Int    @default(0)
+}
+
+// ---------- staff & content ----------
+model Role {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  /// permission keys this role grants, e.g. ["orders","stock","products"]
+  permissions String[]
+  staff       StaffUser[]
+}
+
+model StaffUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String?
+  isSuperAdmin Boolean  @default(false)
+  roleId       String?
+  role         Role?    @relation(fields: [roleId], references: [id])
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model ContentBlock {
+  key       String   @id
+  /// arbitrary payload: homepage blocks, announcement bar, lead-time copy…
+  payload   Json
+  updatedAt DateTime @updatedAt
+}
