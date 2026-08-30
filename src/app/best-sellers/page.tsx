@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
-import { bestSellers } from "@/lib/catalog";
+import { getBestSellers } from "@/lib/catalog-db";
 
 export const metadata: Metadata = {
   title: "Best Sellers",
   description: "Our most-loved personalised products and business printing.",
 };
 
-export default function BestSellersPage() {
+export const dynamic = "force-dynamic";
+
+export default async function BestSellersPage() {
+  const bestSellers = await getBestSellers();
   return (
     <div className="wrap">
       <nav className="breadcrumb" aria-label="Breadcrumb">

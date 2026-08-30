@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
-import { products } from "@/lib/catalog";
+import { listActiveProducts } from "@/lib/catalog-db";
 
 export const metadata: Metadata = {
   title: "Search",
   description: "Search TayMade products.",
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function SearchPage({
   searchParams,
@@ -15,6 +17,7 @@ export default async function SearchPage({
 }) {
   const { q } = await searchParams;
   const query = (q ?? "").toLowerCase().trim();
+  const products = query ? await listActiveProducts() : [];
   const results = query
     ? products.filter(
         (p) =>

@@ -34,21 +34,36 @@ export type NewOrderInput = {
 const DELIVERY_FEE = 4.95;
 
 export async function createOrder(input: NewOrderInput): Promise<{ number: number; id: string }> {
-  const clean = input.items
+  const candidates = input.items
     .map((it) => ({ it, product: getProduct(it.slug) }))
     .filter((x) => x.product);
+
+  // DB is the source of truth for price + visibility (Admin → Products).
+  // Re-price here so an admin edit is what the customer is actually charged,
+  // and drop any product that's been hidden.
+  const dbProducts = await prisma.product.findMany({
+    where: { slug: { in: candidates.map((x) => x.product!.slug) } },
+    select: { id: true, slug: true, basePrice: true, active: true },
+  });
+  const dbBySlug = new Map(dbProducts.map((p) => [p.slug, p]));
+
+  const clean = candidates.filter((x) => (dbBySlug.get(x.product!.slug)?.active ?? true));
+  if (!clean.length) throw new Error("No orderable items (all unavailable).");
+
+  const priceOf = (s: string, fallback: number) => {
+    const row = dbBySlug.get(s);
+    return row ? Number(row.basePrice) : fallback;
+  };
 
   const isClothing = clean.some((x) => x.product!.categories.includes("clothing"));
   const pipeline: Pipeline = isClothing ? "clothing" : "uv";
 
-  const subtotal = clean.reduce((sum, x) => sum + x.product!.price * Math.max(1, x.it.qty), 0);
+  const subtotal = clean.reduce(
+    (sum, x) => sum + priceOf(x.product!.slug, x.product!.price) * Math.max(1, x.it.qty),
+    0,
+  );
   const shipping = input.fulfilment === "delivery" ? DELIVERY_FEE : 0;
 
-  // resolve DB product ids so the line items link back to the catalogue
-  const dbProducts = await prisma.product.findMany({
-    where: { slug: { in: clean.map((x) => x.product!.slug) } },
-    select: { id: true, slug: true },
-  });
   const idBySlug = new Map(dbProducts.map((p) => [p.slug, p.id]));
 
   const order = await prisma.order.create({
@@ -71,7 +86,7 @@ export async function createOrder(input: NewOrderInput): Promise<{ number: numbe
             title: p.name,
             image: p.image,
             qty,
-            unitPrice: p.price,
+            unitPrice: priceOf(p.slug, p.price),
             hasUpload,
             ...(pid ? { product: { connect: { id: pid } } } : {}),
             values: {

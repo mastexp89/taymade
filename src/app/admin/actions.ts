@@ -3,13 +3,34 @@
 import { revalidatePath } from "next/cache";
 import { setOrderStatus } from "@/lib/orders-db";
 import { updateStockItem } from "@/lib/stock-db";
+import { updateProduct, type ProductPatch } from "@/lib/catalog-db";
 import { createStaff, setStaffPassword, setStaffActive, changeOwnPassword } from "@/lib/staff-db";
 import { getSession } from "@/lib/auth";
+import { can } from "@/lib/admin/roles";
 import { nextStatus, type Pipeline, type Status } from "@/lib/admin/order-status";
 
 export async function updateStockAction(id: string, patch: { qty?: number; low?: number }) {
   await updateStockItem(id, patch);
   revalidatePath("/admin/stock");
+}
+
+export async function updateProductAction(slug: string, patch: ProductPatch) {
+  const s = await getSession();
+  if (!s || !can(s.role, "products")) return { ok: false, error: "Not authorised" };
+  try {
+    await updateProduct(slug, patch);
+  } catch (err) {
+    console.error("Product update failed", err);
+    return { ok: false, error: "Could not save. Please try again." };
+  }
+  // The storefront reads these live, so refresh the pages that show products.
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  revalidatePath("/best-sellers");
+  revalidatePath(`/p/${slug}`);
+  revalidatePath("/personalised");
+  revalidatePath("/business");
+  return { ok: true };
 }
 
 async function requireSuper() {

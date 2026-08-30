@@ -6,6 +6,9 @@ import { BusinessBand } from "@/components/home/business-band";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { Reviews } from "@/components/home/reviews";
 
+// Homepage best-sellers are driven by the DB best-seller flag / prices.
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <>

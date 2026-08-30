@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { getProduct } from "@/lib/catalog";
+import { getProduct } from "@/lib/catalog-db";
 
 type IncomingItem = {
   slug: string;
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   // Re-price from the catalogue on the server — never trust client prices.
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
   for (const item of items) {
-    const product = getProduct(item.slug);
+    const product = await getProduct(item.slug);
     if (!product) continue;
     const qty = Math.max(1, Math.min(999, Math.floor(item.qty) || 1));
     const description = (item.personalisation ?? [])

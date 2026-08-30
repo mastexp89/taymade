@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { ArrowRight } from "@/components/icons";
-import { getProductsByCategory, categoryMeta } from "@/lib/catalog";
+import { categoryMeta } from "@/lib/catalog";
+import { getProductsByCategory } from "@/lib/catalog-db";
 
 type Crumb = { label: string; href: string };
 
-export function CategoryView({
+export async function CategoryView({
   token,
   crumbs = [],
   showQuote = false,
@@ -15,7 +16,7 @@ export function CategoryView({
   showQuote?: boolean;
 }) {
   const meta = categoryMeta[token];
-  const products = getProductsByCategory(token);
+  const products = await getProductsByCategory(token);
 
   return (
     <div className="wrap">

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { bestSellers } from "@/lib/catalog";
+import { getBestSellers } from "@/lib/catalog-db";
 import { ArrowRight } from "@/components/icons";
 import { ProductCard } from "@/components/product-card";
 
-export function BestSellers() {
+export async function BestSellers() {
+  const bestSellers = await getBestSellers();
   return (
     <section style={{ paddingTop: 8 }}>
       <div className="wrap">

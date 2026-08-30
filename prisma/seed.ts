@@ -25,10 +25,14 @@ async function main() {
   }
 
   // Products, their images, personalisation fields and category links.
+  // NOTE: `update` is intentionally empty. Once a product row exists, its
+  // price / lead time / visibility / best-seller flag are owned by
+  // Admin → Products — re-seeding on redeploy must never clobber those edits.
+  // Only brand-new catalogue products (no row yet) are created here.
   for (const p of products) {
     await prisma.product.upsert({
       where: { slug: p.slug },
-      update: { title: p.name, basePrice: p.price, active: true },
+      update: {},
       create: {
         slug: p.slug,
         title: p.name,

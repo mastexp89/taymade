@@ -485,6 +485,34 @@ footer{background:var(--footer); color:var(--footer-soft); padding:44px 0 26px; 
 a.file-btn{text-decoration:none; display:inline-flex; align-items:center}
 .file-link{color:var(--teal-deep); font-weight:600; text-decoration:underline}
 .file-link:hover{color:var(--teal)}
+
+/* ---------- admin: product manager ---------- */
+.prod-toolbar{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+.seg{display:inline-flex; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:3px}
+.seg-btn{border:none; background:transparent; color:var(--ink-soft); font-family:var(--font-body); font-size:13.5px; font-weight:600; padding:7px 14px; border-radius:8px; cursor:pointer}
+.seg-btn.on{background:var(--card); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.prod-search{border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:10px; padding:9px 13px; font-family:var(--font-body); font-size:14px; min-width:220px}
+.prod-table td{vertical-align:middle}
+.prod-cell{display:flex; align-items:center; gap:12px}
+.prod-admin-thumb{width:44px; height:44px; border-radius:9px; object-fit:cover; background:var(--tile); flex:0 0 auto}
+.prod-cell-sub{font-size:12.5px; color:var(--ink-faint); font-weight:400}
+.prod-table .stock-input{width:92px}
+.row-hidden{opacity:.55}
+.row-hidden .strong::after{content:" · hidden"; color:var(--coral); font-weight:600; font-size:12px}
+.prod-row-actions{display:flex; align-items:center; gap:10px; justify-content:flex-end}
+.save-tag{font-size:12px; font-weight:600; min-width:52px; text-align:right}
+.save-tag.saving{color:var(--ink-faint)}
+.save-tag.saved{color:var(--c-green,#54B15A)}
+.save-tag.error{color:var(--coral)}
+.prod-edit-row td{background:var(--surface-2); padding:0}
+.prod-details{display:grid; gap:14px; padding:18px 20px; max-width:640px}
+.prod-details .field{display:grid; gap:6px}
+.prod-details label{font-size:13px; font-weight:600; color:var(--ink)}
+.prod-details input, .prod-details textarea{border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:9px; padding:9px 12px; font-family:var(--font-body); font-size:14px; width:100%}
+.switch{width:44px; height:25px; border-radius:999px; border:none; background:var(--line); position:relative; cursor:pointer; padding:0; transition:background .15s}
+.switch.on{background:var(--teal)}
+.switch .knob{position:absolute; top:3px; left:3px; width:19px; height:19px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:left .15s}
+.switch.on .knob{left:22px}
 .proof-state{font-size:14px; color:var(--ink); margin:0 0 4px}
 .side-line{font-size:14px; color:var(--ink-soft); margin:0 0 6px}
 .side-line b{color:var(--ink)}

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/components/product/product-configurator";
-import { getProduct, allProductSlugs } from "@/lib/catalog";
+import { getProduct } from "@/lib/catalog-db";
 
-export function generateStaticParams() {
-  return allProductSlugs().map((slug) => ({ slug }));
-}
+// Prices, names and visibility are edited live in Admin → Products, so render
+// on demand rather than baking pages at build time.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -14,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) return {};
   return {
     title: product.name,
@@ -29,7 +29,7 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) notFound();
 
   const listing = product.side === "business"

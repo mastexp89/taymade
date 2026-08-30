@@ -5,9 +5,8 @@ import { categoryMeta } from "@/lib/catalog";
 
 const SUBS = ["clothing", "bottles-tumblers", "weddings", "sports-clubs"] as const;
 
-export function generateStaticParams() {
-  return SUBS.map((sub) => ({ sub }));
-}
+// Product prices/visibility come from the DB (Admin → Products), so render live.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
