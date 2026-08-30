@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { brand } from "@/lib/brand";
+import { getSiteContent } from "@/lib/site-content";
 import { ArrowRight } from "@/components/icons";
 
-export function Hero() {
+export async function Hero() {
+  const content = await getSiteContent();
   return (
     <section className="hero">
       <div className="hero-in">
@@ -10,7 +11,7 @@ export function Hero() {
           <h1>
             Made for <span className="you">You.</span>
           </h1>
-          <p>{brand.heroSub}</p>
+          <p>{content.heroSub}</p>
           <div className="hero-cta">
             <Link className="btn btn-teal" href="/personalised">
               Shop Personalised <ArrowRight />

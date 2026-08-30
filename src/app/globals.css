@@ -522,6 +522,19 @@ a.file-btn{text-decoration:none; display:inline-flex; align-items:center}
 .cust-orders .admin-table{background:var(--card); border-radius:10px; overflow:hidden}
 .cust-orders .admin-table th{padding:9px 14px}
 .cust-orders .admin-table td{padding:9px 14px}
+
+/* ---------- admin: content editor ---------- */
+.content-groups{display:grid; gap:16px}
+.content-group{padding:20px 22px}
+.content-group-head{margin-bottom:14px}
+.content-group-head .admin-card-h{margin-bottom:2px}
+.content-fields{display:grid; grid-template-columns:1fr 1fr; gap:14px 18px}
+.content-fields .field{display:grid; gap:6px}
+.content-fields .field.wide{grid-column:1 / -1}
+.content-fields label{font-size:13px; font-weight:600; color:var(--ink)}
+.content-fields input, .content-fields textarea{border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:9px; padding:9px 12px; font-family:var(--font-body); font-size:14px; width:100%; resize:vertical}
+.content-savebar{position:sticky; bottom:0; display:flex; align-items:center; gap:14px; padding:16px 2px; margin-top:6px; background:linear-gradient(to top, var(--ground) 60%, transparent)}
+@media (max-width:640px){ .content-fields{grid-template-columns:1fr} }
 .proof-state{font-size:14px; color:var(--ink); margin:0 0 4px}
 .side-line{font-size:14px; color:var(--ink-soft); margin:0 0 6px}
 .side-line b{color:var(--ink)}

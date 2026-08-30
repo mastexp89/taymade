@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { brand, navItems } from "@/lib/brand";
+import { navItems } from "@/lib/brand";
+import type { SiteContent } from "@/lib/site-content";
 import { Logo } from "@/components/logo";
 import { BasketBadge } from "@/components/basket-badge";
 import {
@@ -12,18 +13,18 @@ import {
   TruckIcon,
 } from "@/components/icons";
 
-export function SiteHeader() {
+export function SiteHeader({ content }: { content: SiteContent }) {
   return (
     <>
       <div className="anno">
         <span>
           <MapPinIcon />
-          {brand.announcement.left}
+          {content.announceLeft}
         </span>
         <span className="dot">•</span>
         <span>
           <TruckIcon />
-          {brand.announcement.right}
+          {content.announceRight}
         </span>
       </div>
 

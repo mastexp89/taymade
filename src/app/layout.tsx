@@ -3,6 +3,11 @@ import { Poppins, Figtree, Dancing_Script, Caveat, Playfair_Display } from "next
 import "./globals.css";
 import { SiteChrome } from "@/components/site-chrome";
 import { brand } from "@/lib/brand";
+import { getSiteContent } from "@/lib/site-content";
+
+// The header/footer/announcement pull editable content from the DB
+// (Admin → Content), so render on demand.
+export const dynamic = "force-dynamic";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -45,11 +50,12 @@ export const metadata: Metadata = {
     "Personalised gifts, clothing and business printing — NFC & QR products, workwear and more, designed and produced in Dundee.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const content = await getSiteContent();
   return (
     <html lang="en-GB" className={`${poppins.variable} ${figtree.variable} ${dancing.variable} ${caveat.variable} ${playfair.variable} antialiased`}>
       <body>
-        <SiteChrome>{children}</SiteChrome>
+        <SiteChrome content={content}>{children}</SiteChrome>
       </body>
     </html>
   );

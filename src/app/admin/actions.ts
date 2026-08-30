@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { setOrderStatus } from "@/lib/orders-db";
 import { updateStockItem } from "@/lib/stock-db";
 import { updateProduct, type ProductPatch } from "@/lib/catalog-db";
+import { updateSiteContent, type SiteContent } from "@/lib/site-content";
 import { createStaff, setStaffPassword, setStaffActive, changeOwnPassword } from "@/lib/staff-db";
 import { getSession } from "@/lib/auth";
 import { can } from "@/lib/admin/roles";
@@ -30,6 +31,21 @@ export async function updateProductAction(slug: string, patch: ProductPatch) {
   revalidatePath(`/p/${slug}`);
   revalidatePath("/personalised");
   revalidatePath("/business");
+  return { ok: true };
+}
+
+export async function updateSiteContentAction(patch: Partial<SiteContent>) {
+  const s = await getSession();
+  if (!s || !can(s.role, "content")) return { ok: false, error: "Not authorised" };
+  try {
+    await updateSiteContent(patch);
+  } catch (err) {
+    console.error("Content update failed", err);
+    return { ok: false, error: "Could not save. Please try again." };
+  }
+  // Chrome (header/footer/announcement) lives in the root layout, so revalidate
+  // the whole layout to refresh it across every storefront page.
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 

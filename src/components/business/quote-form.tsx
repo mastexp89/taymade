@@ -16,7 +16,7 @@ const NEEDS = [
   "Other",
 ];
 
-export function QuoteForm() {
+export function QuoteForm({ contactPhone = "01382 123 456" }: { contactPhone?: string }) {
   const [company, setCompany] = useState("");
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
@@ -80,7 +80,7 @@ export function QuoteForm() {
         <div className="tick" aria-hidden="true">✓</div>
         <h2>Thanks, {contact.split(" ")[0] || "there"}!</h2>
         <p>Your enquiry is in. We&apos;ll review what you need and get back to you — usually within one working day.</p>
-        <p className="admin-sub">A copy has been logged for the team. For anything urgent, call us on 01382 123 456.</p>
+        <p className="admin-sub">A copy has been logged for the team. For anything urgent, call us on {contactPhone}.</p>
         <Link className="btn btn-teal" href="/business">Back to business</Link>
       </div>
     );

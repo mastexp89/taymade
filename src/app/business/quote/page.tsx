@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { QuoteForm } from "@/components/business/quote-form";
+import { getSiteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Get a business quote",
@@ -14,7 +15,8 @@ const benefits = [
   { t: "Fast turnaround", d: "Most business orders ready within a week. Rush jobs? Just ask." },
 ];
 
-export default function QuotePage() {
+export default async function QuotePage() {
+  const content = await getSiteContent();
   return (
     <div className="wrap">
       <nav className="breadcrumb" aria-label="Breadcrumb">
@@ -33,7 +35,7 @@ export default function QuotePage() {
 
       <div className="quote-layout">
         <div className="quote-card">
-          <QuoteForm />
+          <QuoteForm contactPhone={content.phone} />
         </div>
         <aside className="quote-side">
           <div className="admin-card">
@@ -49,9 +51,9 @@ export default function QuotePage() {
           </div>
           <div className="admin-card">
             <h2 className="admin-card-h">Prefer to talk?</h2>
-            <p className="side-line">📞 01382 123 456</p>
-            <p className="side-line">✉️ <a className="admin-link" href="mailto:hello@taymadestudio.co.uk">hello@taymadestudio.co.uk</a></p>
-            <p className="side-line admin-sub">Mon–Fri 9am–5pm · Unit 3, Dock Street, Dundee</p>
+            <p className="side-line">📞 {content.phone}</p>
+            <p className="side-line">✉️ <a className="admin-link" href={`mailto:${content.email}`}>{content.email}</a></p>
+            <p className="side-line admin-sub">{[content.hours1, content.addressLine1, content.addressLine2].filter(Boolean).join(" · ")}</p>
           </div>
         </aside>
       </div>
