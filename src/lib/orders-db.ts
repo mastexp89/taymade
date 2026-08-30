@@ -28,7 +28,7 @@ export type NewOrderInput = {
   name: string;
   email: string;
   fulfilment: "collection" | "delivery";
-  items: { slug: string; qty: number; personalisation?: { label: string; value: string }[] }[];
+  items: { slug: string; qty: number; personalisation?: { label: string; value: string; uploadId?: string }[] }[];
 };
 
 const DELIVERY_FEE = 4.95;
@@ -79,6 +79,7 @@ export async function createOrder(input: NewOrderInput): Promise<{ number: numbe
                 key: slug(pv.label),
                 label: pv.label,
                 value: pv.value,
+                ...(pv.uploadId ? { upload: { connect: { id: pv.uploadId } } } : {}),
               })),
             },
           };
@@ -96,7 +97,7 @@ type DbOrder = Awaited<ReturnType<typeof fetchOrders>>[number];
 function fetchOrders() {
   return prisma.order.findMany({
     orderBy: { createdAt: "desc" },
-    include: { items: { include: { values: true } } },
+    include: { items: { include: { values: { include: { upload: true } } } } },
   });
 }
 
@@ -118,7 +119,12 @@ function mapOrder(o: DbOrder): AdminOrder {
       qty: it.qty,
       image: it.image ?? "/illustrations/biz-nfc.svg",
       hasUpload: it.hasUpload,
-      personalisation: it.values.map((v) => ({ label: v.label, value: v.value ?? "" })),
+      personalisation: it.values.map((v) => ({
+        label: v.label,
+        value: v.value ?? "",
+        uploadUrl: v.upload ? `/api/files/${v.upload.id}` : undefined,
+        uploadName: v.upload?.filename ?? undefined,
+      })),
     })),
   };
 }
@@ -131,7 +137,7 @@ export async function listOrders(): Promise<AdminOrder[]> {
 export async function getOrderById(id: string): Promise<AdminOrder | null> {
   const o = await prisma.order.findUnique({
     where: { id },
-    include: { items: { include: { values: true } } },
+    include: { items: { include: { values: { include: { upload: true } } } } },
   });
   return o ? mapOrder(o) : null;
 }

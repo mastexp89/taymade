@@ -31,7 +31,11 @@ services:
       NEXT_PUBLIC_SITE_URL: ${SITE_URL:-}
       # Set COOKIE_SECURE=true in .env once you're on HTTPS.
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # Customer artwork / logo uploads live here (persisted in the uploads volume).
+      UPLOAD_DIR: /app/uploads
       NODE_ENV: production
+    volumes:
+      - uploads:/app/uploads
     # Behind a reverse proxy (nginx) → bind localhost only. Override with WEB_BIND
     # in .env, e.g. WEB_BIND=80 to publish directly on port 80.
     ports:
@@ -39,3 +43,4 @@ services:
 
 volumes:
   pgdata:
+  uploads:

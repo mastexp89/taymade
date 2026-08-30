@@ -5,6 +5,7 @@ import Link from "next/link";
 import { addToBasket } from "@/lib/basket";
 import { priceGBP, type Product, type PersonalField } from "@/lib/catalog";
 import { ArrowRight, Stars } from "@/components/icons";
+import { UploadField } from "@/components/upload-field";
 
 // Maps the font choices to real web fonts loaded in the layout.
 const FONT_MAP: Record<string, string> = {
@@ -26,11 +27,22 @@ export function ProductConfigurator({ product }: { product: Product }) {
   }, [product]);
 
   const [values, setValues] = useState<Record<string, string>>(initial);
+  const [uploads, setUploads] = useState<Record<string, { id: string; name: string }>>({});
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
   const set = (k: string, val: string) => {
     setValues((s) => ({ ...s, [k]: val }));
+    setAdded(false);
+  };
+
+  const handleUpload = (key: string, u: { id: string; name: string } | null) => {
+    setValues((s) => ({ ...s, [key]: u?.name ?? "" }));
+    setUploads((s) => {
+      const next = { ...s };
+      if (u) next[key] = u; else delete next[key];
+      return next;
+    });
     setAdded(false);
   };
 
@@ -61,7 +73,11 @@ export function ProductConfigurator({ product }: { product: Product }) {
       image: product.image,
       unitPrice: product.price,
       qty,
-      personalisation: summary.map((s) => ({ label: s.field.label, value: s.value })),
+      personalisation: summary.map((s) => ({
+        label: s.field.label,
+        value: s.value,
+        uploadId: uploads[s.field.key]?.id,
+      })),
     });
     setAdded(true);
   }
@@ -133,7 +149,7 @@ export function ProductConfigurator({ product }: { product: Product }) {
                 {f.label}
                 {f.required && <span className="req">*</span>}
               </label>
-              <FieldInput field={f} value={values[f.key] ?? ""} onChange={(v) => set(f.key, v)} />
+              <FieldInput field={f} value={values[f.key] ?? ""} onChange={(v) => set(f.key, v)} onUpload={(u) => handleUpload(f.key, u)} />
               {f.help && <div className="help">{f.help}</div>}
             </div>
           ))}
@@ -215,10 +231,12 @@ function FieldInput({
   field,
   value,
   onChange,
+  onUpload,
 }: {
   field: PersonalField;
   value: string;
   onChange: (v: string) => void;
+  onUpload: (u: { id: string; name: string } | null) => void;
 }) {
   switch (field.type) {
     case "textarea":
@@ -242,12 +260,7 @@ function FieldInput({
         </div>
       );
     case "upload":
-      return (
-        <label className="uploadbox">
-          {value ? <span className="picked">✓ {value}</span> : "Click to upload a file (PNG, JPG, PDF, SVG)"}
-          <input type="file" accept=".png,.jpg,.jpeg,.pdf,.svg" onChange={(e) => onChange(e.target.files?.[0]?.name ?? "")} />
-        </label>
-      );
+      return <UploadField kind={field.key === "logo" ? "LOGO" : "ARTWORK"} onUploaded={onUpload} />;
     case "number":
       return <input type="number" value={value} placeholder={field.placeholder} onChange={(e) => onChange(e.target.value)} />;
     case "url":

@@ -48,7 +48,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                       <div key={i} style={{ display: "contents" }}>
                         <dt>{p.label}</dt>
                         <dd>
-                          {/^#[0-9a-f]{3,8}$/i.test(p.value) ? (
+                          {p.uploadUrl ? (
+                            <a href={p.uploadUrl} target="_blank" rel="noreferrer" className="file-link">
+                              {p.uploadName ?? "View file"}
+                            </a>
+                          ) : /^#[0-9a-f]{3,8}$/i.test(p.value) ? (
                             <><span className="swatch-dot" style={{ background: p.value }} /> {p.value}</>
                           ) : p.value}
                         </dd>
@@ -57,7 +61,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   </dl>
                   <div className="prod-files">
                     <button className="file-btn" type="button" title="Demo — real print files come with the uploads step">⬇ Download print file</button>
-                    {item.hasUpload && <button className="file-btn" type="button">⬇ Customer artwork</button>}
+                    {item.personalisation
+                      .filter((p) => p.uploadUrl)
+                      .map((p, i) => (
+                        <a key={i} className="file-btn" href={p.uploadUrl} download target="_blank" rel="noreferrer">
+                          ⬇ {p.uploadName ?? "Customer artwork"}
+                        </a>
+                      ))}
                   </div>
                 </div>
               </div>

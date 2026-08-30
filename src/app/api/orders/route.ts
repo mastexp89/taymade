@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     name?: string;
     email?: string;
     fulfilment?: "collection" | "delivery";
-    items?: { slug: string; qty: number; personalisation?: { label: string; value: string }[] }[];
+    items?: { slug: string; qty: number; personalisation?: { label: string; value: string; uploadId?: string }[] }[];
   };
   try {
     body = await req.json();

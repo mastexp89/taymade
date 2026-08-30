@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "@/components/icons";
+import { UploadField } from "@/components/upload-field";
 
 const NEEDS = [
   "Workwear",
@@ -24,6 +25,7 @@ export function QuoteForm() {
   const [quantity, setQuantity] = useState("");
   const [requiredBy, setRequiredBy] = useState("");
   const [logoName, setLogoName] = useState("");
+  const [logoUploadId, setLogoUploadId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -54,6 +56,7 @@ export function QuoteForm() {
           quantity: quantity.trim() || undefined,
           requiredBy: requiredBy || undefined,
           logoName: logoName || undefined,
+          logoUploadId: logoUploadId || undefined,
           message: message.trim() || undefined,
         }),
       });
@@ -128,10 +131,13 @@ export function QuoteForm() {
 
       <div className="field">
         <label>Upload your logo (optional)</label>
-        <label className="uploadbox">
-          {logoName ? <span className="picked">✓ {logoName}</span> : "Click to upload (PNG, JPG, PDF, SVG)"}
-          <input type="file" accept=".png,.jpg,.jpeg,.pdf,.svg" onChange={(e) => setLogoName(e.target.files?.[0]?.name ?? "")} />
-        </label>
+        <UploadField
+          kind="LOGO"
+          onUploaded={(u) => {
+            setLogoUploadId(u?.id ?? null);
+            setLogoName(u?.name ?? "");
+          }}
+        />
       </div>
 
       <div className="field">

@@ -482,6 +482,9 @@ footer{background:var(--footer); color:var(--footer-soft); padding:44px 0 26px; 
 .prod-files{display:flex; gap:10px; flex-wrap:wrap}
 .file-btn{border:1.5px solid var(--line); background:var(--surface); color:var(--ink); border-radius:9px; padding:8px 13px; font-family:var(--font-body); font-size:13px; font-weight:600; cursor:pointer}
 .file-btn:hover{border-color:var(--teal); color:var(--teal-deep)}
+a.file-btn{text-decoration:none; display:inline-flex; align-items:center}
+.file-link{color:var(--teal-deep); font-weight:600; text-decoration:underline}
+.file-link:hover{color:var(--teal)}
 .proof-state{font-size:14px; color:var(--ink); margin:0 0 4px}
 .side-line{font-size:14px; color:var(--ink-soft); margin:0 0 6px}
 .side-line b{color:var(--ink)}

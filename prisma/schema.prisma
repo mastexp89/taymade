@@ -271,7 +271,9 @@ model Upload {
   customerId String?
   customer   Customer?              @relation(fields: [customerId], references: [id])
   url        String
+  filename   String?
   mime       String?
+  size       Int?
   kind       UploadKind             @default(ARTWORK)
   values     PersonalisationValue[]
   createdAt  DateTime               @default(now())
@@ -356,6 +358,7 @@ model Enquiry {
   quantity   String?
   requiredBy String?
   logoName   String?
+  logoUploadId String?
   message    String?
   status     EnquiryStatus @default(NEW)
   createdAt  DateTime      @default(now())

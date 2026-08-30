@@ -12,7 +12,7 @@ export type BasketItem = {
   image: string;
   unitPrice: number;
   qty: number;
-  personalisation: { label: string; value: string }[];
+  personalisation: { label: string; value: string; uploadId?: string }[];
 };
 
 const KEY = "taymade.basket.v1";

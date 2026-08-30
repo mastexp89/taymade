@@ -46,7 +46,13 @@ export default async function EnquiriesPage() {
                   <p className="admin-sub">
                     {e.requiredBy ? `Needed by ${e.requiredBy}` : ""}
                     {e.requiredBy && e.logoName ? " · " : ""}
-                    {e.logoName ? `Logo: ${e.logoName}` : ""}
+                    {e.logoName ? (
+                      e.logoUrl ? (
+                        <>Logo: <a href={e.logoUrl} download target="_blank" rel="noreferrer" className="file-link">{e.logoName}</a></>
+                      ) : (
+                        `Logo: ${e.logoName}`
+                      )
+                    ) : ""}
                   </p>
                 )}
               </div>

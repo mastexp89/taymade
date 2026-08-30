@@ -19,6 +19,7 @@ export type NewEnquiry = {
   quantity?: string;
   requiredBy?: string;
   logoName?: string;
+  logoUploadId?: string;
   message?: string;
 };
 
@@ -32,6 +33,7 @@ export type EnquiryRow = {
   quantity: string | null;
   requiredBy: string | null;
   logoName: string | null;
+  logoUrl: string | null;
   message: string | null;
   statusLabel: string;
   statusKey: string;
@@ -49,6 +51,7 @@ export async function createEnquiry(input: NewEnquiry) {
       quantity: input.quantity,
       requiredBy: input.requiredBy,
       logoName: input.logoName,
+      logoUploadId: input.logoUploadId,
       message: input.message,
     },
   });
@@ -66,6 +69,7 @@ export async function listEnquiries(): Promise<EnquiryRow[]> {
     quantity: e.quantity,
     requiredBy: e.requiredBy,
     logoName: e.logoName,
+    logoUrl: e.logoUploadId ? `/api/files/${e.logoUploadId}` : null,
     message: e.message,
     statusLabel: STATUS_LABEL[e.status] ?? e.status,
     statusKey: e.status,

@@ -85,7 +85,7 @@ export type AdminOrderItem = {
   title: string;
   qty: number;
   image: string;
-  personalisation: { label: string; value: string }[];
+  personalisation: { label: string; value: string; uploadUrl?: string; uploadName?: string }[];
   hasUpload?: boolean;
 };
 

@@ -3,7 +3,7 @@ import { createEnquiry } from "@/lib/enquiries-db";
 export async function POST(req: Request) {
   let body: {
     company?: string; contact?: string; email?: string; phone?: string;
-    needs?: string[]; quantity?: string; requiredBy?: string; logoName?: string; message?: string;
+    needs?: string[]; quantity?: string; requiredBy?: string; logoName?: string; logoUploadId?: string; message?: string;
   };
   try {
     body = await req.json();
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       quantity: body.quantity?.trim() || undefined,
       requiredBy: body.requiredBy || undefined,
       logoName: body.logoName || undefined,
+      logoUploadId: body.logoUploadId || undefined,
       message: body.message?.trim() || undefined,
     });
     return Response.json({ ok: true });
