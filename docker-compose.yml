@@ -32,8 +32,10 @@ services:
       # Set COOKIE_SECURE=true in .env once you're on HTTPS.
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       NODE_ENV: production
+    # Behind a reverse proxy (nginx) → bind localhost only. Override with WEB_BIND
+    # in .env, e.g. WEB_BIND=80 to publish directly on port 80.
     ports:
-      - "80:3000"
+      - "${WEB_BIND:-127.0.0.1:8090}:3000"
 
 volumes:
   pgdata:
