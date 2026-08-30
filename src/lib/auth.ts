@@ -23,7 +23,10 @@ export async function createSession(session: Session) {
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    // Only mark Secure when actually served over HTTPS. On a plain-HTTP IP
+    // deploy a Secure cookie would be dropped by the browser (can't log in).
+    // Set COOKIE_SECURE=true in the env once HTTPS/a domain is in place.
+    secure: process.env.COOKIE_SECURE === "true",
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });
