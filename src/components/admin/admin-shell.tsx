@@ -64,7 +64,7 @@ export function AdminShell({
       <div className="admin-main">
         <header className="admin-top">
           <div className="admin-whoami">
-            Signed in as <b>{session.name}</b> · {ROLE_LABEL[session.role]}
+            Signed in as <Link href="/admin/account" className="admin-whoami-link"><b>{session.name}</b></Link> · {ROLE_LABEL[session.role]}
           </div>
           <LogoutButton />
         </header>

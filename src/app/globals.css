@@ -388,6 +388,15 @@ footer{background:var(--footer); color:var(--footer-soft); padding:44px 0 26px; 
 .admin-top{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 26px; border-bottom:1px solid var(--line); background:var(--surface); flex-wrap:wrap}
 .admin-whoami{font-size:13px; color:var(--ink-soft)}
 .admin-whoami b{color:var(--ink)}
+.admin-whoami-link:hover b{color:var(--teal-deep)}
+.staff-actions{display:flex; gap:8px; flex-wrap:wrap}
+.staff-reset{display:flex; gap:8px; align-items:center; margin-top:8px}
+.staff-ok{color:var(--teal-deep); font-size:13px; font-weight:600; margin-top:6px}
+.staff-err{color:var(--coral); font-size:13px; font-weight:600; margin-top:6px}
+.staff-form .field{margin-bottom:14px}
+.staff-form .field label{display:block; font-size:13px; font-weight:600; color:var(--ink); margin-bottom:5px}
+.staff-form .field input{width:100%; border:1.5px solid var(--line); background:var(--ground); color:var(--ink); border-radius:10px; padding:10px 12px; font-family:var(--font-body); font-size:14.5px}
+.staff-form .field input:focus{outline:none; border-color:var(--teal)}
 .admin-logout{border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft); border-radius:9px; padding:7px 13px; font-family:var(--font-body); font-size:13px; font-weight:600; cursor:pointer}
 .admin-logout:hover{border-color:var(--coral); color:var(--coral)}
 
